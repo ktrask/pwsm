@@ -96,6 +96,7 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
 		$deletePw = 1;
 	}
 	elsif($ARGV[$count] eq "--def-user") {
+		$isDefineUser = 1;
 	}
 	elsif($ARGV[$count] eq "-h") {
 		print "USAGE:
@@ -116,7 +117,11 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
 }
 
 
-`echo "pwsm password file. Version 0.0.1\nPWLIST:" >> $pwfile` unless(-e $pwfile);
+unless(-e $pwfile)
+{
+	`echo "pwsm password file. Version 0.0.1\nPWLIST:" >> $pwfile`;
+	print "aha\n";
+}
 
 if($isDefineUser == 1) {
 	$isDefineUser = 1;
@@ -126,7 +131,7 @@ if($isDefineUser == 1) {
 	$input =~ s/,/\n/;
 	my $sign = `echo "$input" | gpg --clearsign`;
 	print "$sign";
-	$sign =~s/\n/\$/;
+	$sign =~s/\n/\$/g;
 	open(fh, "<", $pwfile);
 	my @file = <fh>;
 	close(fh);
@@ -136,17 +141,17 @@ if($isDefineUser == 1) {
 		if(m/^signkey:$keys[0]/)
 		{
 			print "ok\n";
-			$file[$kount]= "signkey:$keys[0]\$$signi\n";
-			exit(0);
+			$file[$kount]= "signkey:$keys[0]\$$sign\n";
+			$kount = scalar @file;
 		}
 		elsif(m/PWLIST:/) {				
 			print "ok\n";
-			$file[$kount]= "signkey:$keys[0]\$$signi\nPWLIST:\n";
-			exit(0);
+			$file[$kount]= "signkey:$keys[0]\$$sign\nPWLIST:\n";
+			$kount = scalar @file;
 		}
 	}
 #writes the password file:
-	open(fh, ">", "$pwfile");
+	open(fh, ">", $pwfile);
 	print fh @file;
 	close(fh);
 	exit(0);
