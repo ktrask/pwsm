@@ -158,17 +158,18 @@ if($isDefineUser == 1) {
 }
 
 sub getNewPw{
-	my $newPw;
+	my $newPw = "pw";
 	if( $toClipboard == 1) 	{
 		$newPw = Clipboard->paste; #get the clipboard entry
 	}
 	else {
 		print "Please give the new password: ";
-		my $newPw = <STDIN>;
+		$newPw = <STDIN>;
 		chomp($newPw);
 	}
 	my $gpgKeys = " -r " . join(" -r ",@keys);
-	print "$gpgKeys\n";
+	#print "$gpgKeys\n";
+	$gpgKeys =~ s/-r $//;
 	my $newValue = `echo "$newPw" | gpg $gpgKeys -e -a`;
 	$newValue=~s/\n/\$/g;
 	return "$newValue\n";
@@ -259,11 +260,12 @@ for($kount = 0; $kount < scalar @file; $kount++)
 		}
 	}
 	else {
-		print "TODO\n";
+		#print "TODO\n";
 	}
 }
 
 if( $addPw == 1) {
+	print "add pw";
 	$file[$kount] = "$keyname\n";
 	$file[$kount+1] = getNewPw();
 }
