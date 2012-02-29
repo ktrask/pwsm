@@ -16,4 +16,10 @@ Copyright (C) 2012 <Heinrich Schmidt>
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+This program stores passwords as key-value pairs, where the key is in one line and the value is in the next line. The passwords are encrypt with gpg. This allows you to encrypt your passwords with multiple keys an share them with your employees.
+The program is written in perl and it needs the perl module "Clipboard".
 
+Example Usage:
+	pwsm.pl -k githubpassword   #to get the github password
+	pwsm.pl -k githubpassword -c -a #to change the githubpassword or to add it if its not exists right now.
+	pwsm.pl --def-user  #prompts for the gpg keys you want to use

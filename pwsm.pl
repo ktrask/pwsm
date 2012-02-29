@@ -34,11 +34,13 @@ my $configFileName = "$ENV{HOME}/.pwsmrc";
 my $isDefineUser = 0;
 
 
-if($ARGV[0] eq "--config-file")
+for(my $count = 0; $count < scalar @ARGV; $count ++)
 {
-	$configFileName = $ARGV[1];
+	if($ARGV[$count] eq "--config-file")
+	{
+		$configFileName = $ARGV[$count];
+	}
 }
-
 
 
 if(-e $configFileName) {
@@ -98,7 +100,7 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
 	elsif($ARGV[$count] eq "-h") {
 		print "USAGE:
 --config-file file 
-           defines the configfile, this option works only if it is the first commandline option
+           defines the configfile which should be used, default is ~/.pwsmrc
 -f file    defines the password file
 -k name    descriptor of the password
 -p         print password to stdout, and not to the clipboard
@@ -109,6 +111,7 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
 --def-user
            prompts for the gpg key-ids which you want to use to encrypt for
 ";
+		exit(0);
 	}
 }
 
