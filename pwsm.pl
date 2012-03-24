@@ -23,7 +23,7 @@ use Clipboard;
 
 
 my $pwfile = ".pwfile"; #the default name of the password file, which could be in the current working directory 
-$pwfile = "~/.pwfile" unless( -e $pwfile ) ; 
+$pwfile = $ENV{"HOME"} . "/.pwfile" unless( -e $pwfile ) ; 
 my $keyname = "testkey";
 my $toClipboard = 1; #dont print the password, just copy it to the clipboard
 my $addPw = 0;
@@ -32,6 +32,7 @@ my $deletePw = 0;#last feature which is needed, and only with 3 confirmations
 my @keys; #i should add my own key here, so I can read all you passwords ;)
 my $configFileName = "$ENV{HOME}/.pwsmrc";
 my $isDefineUser = 0;
+my $listKeynames = 0;
 
 
 for(my $count = 0; $count < scalar @ARGV; $count ++)
@@ -86,6 +87,9 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
 	elsif($ARGV[$count] eq "-p") {
 		$toClipboard = 0;
 	}
+	elsif($ARGV[$count] eq "-l") {
+		$listKeynames = 1;
+	}
 	elsif($ARGV[$count] eq "-a") {
 		$addPw = 1;
 	}
@@ -104,6 +108,7 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
            defines the configfile which should be used, default is ~/.pwsmrc
 -f file    defines the password file
 -k name    descriptor of the password
+-l         list key names
 -p         print password to stdout, and not to the clipboard
 -a         add a new password
 -c         change password
@@ -120,7 +125,7 @@ for(my $count = 0; $count < scalar @ARGV; $count++)
 unless(-e $pwfile)
 {
 	`echo "pwsm password file. Version 0.0.1\nPWLIST:" >> $pwfile`;
-	print "aha\n";
+	print "new pw file written\n";
 }
 
 if($isDefineUser == 1) {
@@ -188,6 +193,7 @@ close(fh);
 my $isPwList = 0;
 my $isKey = 1; #is 1 if the actual line should be a key and not the value
 my $isSearchedKey = 0; #is 1, when the next value is the desired one
+my $isKeyFound = 0;
 
 my $kount;
 for($kount = 0; $kount < scalar @file; $kount++)
@@ -198,6 +204,9 @@ for($kount = 0; $kount < scalar @file; $kount++)
 	}
 	elsif( $isPwList == 1 )	{
 		if( $isKey == 1) {
+			if($listKeynames) {
+				print;
+			}
 			if(m/^$keyname$/) {
 				$isSearchedKey = 1;
 			}
@@ -221,8 +230,8 @@ for($kount = 0; $kount < scalar @file; $kount++)
 					else {
 						print "$pw\n";
 					}
-				}
-				
+				}		
+				$isKeyFound = 1;
 			}
 			$isSearchedKey = 0;
 		}
@@ -235,7 +244,7 @@ for($kount = 0; $kount < scalar @file; $kount++)
 		s/........\$//;
 		my $keyid = $&;
 		$keyid =~s/\$//;
-		print "$keyid\n";
+		#print "$keyid\n";
 		if($keyid eq $keys[0]) #the first key in the configfile must be you own key
 		{
 			s/\$/\n/g;
@@ -251,7 +260,7 @@ for($kount = 0; $kount < scalar @file; $kount++)
 				@sig = split/\n/;
 				until($sig[$qount]=~m/-----BEGIN PGP SIGNATURE-----/)
 				{
-					print "$sig[$qount]\n";
+					#print "$sig[$qount]\n";
 					push @keys, $sig[$qount]; 
 					$qount++;
 				}
@@ -268,6 +277,11 @@ if( $addPw == 1) {
 	print "add pw";
 	$file[$kount] = "$keyname\n";
 	$file[$kount+1] = getNewPw();
+}
+else {
+	if ( ($isKeyFound == 0) and ($listKeynames == 0) ) {
+		print "Key ‘$keyname’ is not available\n";
+	}
 }
 
 #writes the password file:
